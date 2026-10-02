@@ -12,3 +12,5 @@ target/
 .idea/
 .vscode/
 *.log
+mosquitto/config/passwd
+.secrets/

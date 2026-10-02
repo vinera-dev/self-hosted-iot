@@ -31,9 +31,41 @@ devices / simulator ──MQTT──► Mosquitto ──► Node-RED ──► T
 
 Docker Compose, Eclipse Mosquitto, Node-RED, PostgreSQL with TimescaleDB, Grafana, Nginx, Python, GitHub Actions.
 
+## Running the broker locally
+
+```bash
+cp .env.example .env
+docker compose up -d --wait
+bash scripts/create-mqtt-users.sh device-01 device-02
+docker compose restart mosquitto
+```
+
+The broker listens on `127.0.0.1:11883` (set `MQTT_PORT` to change it). The script creates the `service` user and one user per device with random passwords, writes the hashed password file used by Mosquitto, and saves the plain credentials to `.secrets/mqtt-credentials.env`. Both are ignored by git.
+
+### Access model
+
+Anonymous access is disabled. Topic permissions live in `mosquitto/config/acl`:
+
+| User | Can publish | Can read |
+|---|---|---|
+| `device-NN` | `devices/device-NN/telemetry`, `devices/device-NN/state` | `devices/device-NN/commands` |
+| `service` | `devices/+/commands` | `devices/+/telemetry`, `devices/+/state` |
+
+Mosquitto's built-in ACL does not reject a subscription to a topic the client cannot read: the subscription is acknowledged, and the read permission is enforced when messages are delivered. The tests therefore check that nothing is delivered, with a positive control, rather than expecting a rejected subscription.
+
+### Tests
+
+```bash
+python -m venv .venv
+pip install -r requirements-dev.txt
+pytest
+```
+
+The tests connect to the running broker with MQTT 5 and cover authentication and the ACL. They are skipped with an explanatory message when the broker or the credentials are not available.
+
 ## Roadmap
 
-- [ ] 1. Compose skeleton with an authenticated Mosquitto broker
+- [x] 1. Compose skeleton with an authenticated Mosquitto broker
 - [ ] 2. Device simulator
 - [ ] 3. TimescaleDB storage and Node-RED ingestion flow
 - [ ] 4. Grafana dashboards provisioned as code

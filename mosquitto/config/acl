@@ -1,0 +1,8 @@
+pattern write devices/%u/telemetry
+pattern write devices/%u/state
+pattern read devices/%u/commands
+
+user service
+topic read devices/+/telemetry
+topic read devices/+/state
+topic write devices/+/commands

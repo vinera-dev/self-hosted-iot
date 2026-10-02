@@ -11,6 +11,7 @@ fi
 cd "$(dirname "$0")/.."
 
 PASSWD_FILE=/mosquitto/config/passwd
+ACL_FILE=/mosquitto/config/acl
 SECRETS_DIR=.secrets
 CREDENTIALS_FILE="$SECRETS_DIR/mqtt-credentials.env"
 
@@ -42,7 +43,7 @@ for device in "$@"; do
 done
 
 docker compose run --rm --no-deps -T --entrypoint sh mosquitto \
-  -c "chown mosquitto:mosquitto $PASSWD_FILE && chmod 600 $PASSWD_FILE" > /dev/null
+  -c "chown mosquitto:mosquitto $PASSWD_FILE $ACL_FILE && chmod 600 $PASSWD_FILE && chmod 640 $ACL_FILE" > /dev/null
 
 echo "created users: service $*"
 echo "credentials written to $CREDENTIALS_FILE"

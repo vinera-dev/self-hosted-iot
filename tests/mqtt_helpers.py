@@ -53,9 +53,7 @@ class Session:
         self.client.disconnect()
 
 
-def open_session(
-    host: str, port: int, username: str | None, password: str | None
-) -> Session:
+def open_session(host: str, port: int, username: str | None, password: str | None) -> Session:
     client = mqtt.Client(
         CallbackAPIVersion.VERSION2,
         client_id=f"test-{uuid.uuid4().hex[:12]}",

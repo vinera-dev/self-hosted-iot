@@ -23,7 +23,7 @@ def load_credentials() -> dict[str, str]:
         for line in CREDENTIALS_FILE.read_text(encoding="utf-8").splitlines()
         if "=" in line
     )
-    return {key: value for key, value in pairs}
+    return dict(pairs)
 
 
 @pytest.fixture(scope="session")

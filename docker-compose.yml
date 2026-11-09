@@ -59,6 +59,8 @@ services:
       PGDATABASE: ${POSTGRES_DB:-iot}
       PGPASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
       TZ: UTC
+      NODE_RED_ADMIN_USER: ${NODE_RED_ADMIN_USER:-admin}
+      NODE_RED_ADMIN_PASSWORD: ${NODE_RED_ADMIN_PASSWORD:?copy .env.example to .env}
       TEMP_HIGH_C: ${TEMP_HIGH_C:-28}
       TEMP_LOW_C: ${TEMP_LOW_C:-25}
     volumes:

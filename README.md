@@ -82,6 +82,21 @@ SIM_DEVICES=device-01,device-02 SIM_INTERVAL_SECONDS=5 python -m simulator
 
 A telemetry message looks like `{"device_id": "device-01", "ts": "2030-01-01T12:00:00+00:00", "temperature_c": 22.13, "humidity_pct": 49.8}`. The relay command is `{"relay": "on"}` or `{"relay": "off"}`; anything else is ignored. With the relay on, the simulated temperature drifts down. The simulator's logic is covered by unit tests that need no broker; the broker tests still need `docker compose up`.
 
+## Supported architectures
+
+Every image used by the Compose file publishes manifests for both x86-64 and ARM64, so the same configuration runs on a Raspberry Pi 4 or 5 (64-bit OS) and on a regular PC. The table is produced by `bash scripts/check-architectures.sh`, which reads the registry manifests and exits with an error when an image lacks one of the two platforms.
+
+| Image | linux/amd64 | linux/arm64 |
+|---|---|---|
+| `eclipse-mosquitto:2` | yes | yes |
+| `timescale/timescaledb:2.17.2-pg16` | yes | yes |
+| `nodered/node-red:4.0.5` | yes | yes |
+| `grafana/grafana:11.3.0` | yes | yes |
+| `nginx:1.27-alpine` | yes | yes |
+| `alpine:3.20` (backup helper) | yes | yes |
+
+The manifests were verified; the stack itself has only been run on x86-64. The Node-RED image is built locally from the official one and adds a pure JavaScript package, so it needs no architecture-specific build step.
+
 ## Roadmap
 
 - [x] 1. Compose skeleton with an authenticated Mosquitto broker

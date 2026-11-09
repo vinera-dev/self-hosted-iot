@@ -63,10 +63,29 @@ pytest
 
 The tests connect to the running broker with MQTT 5 and cover authentication and the ACL. They are skipped with an explanatory message when the broker or the credentials are not available.
 
+## Device simulator
+
+`python -m simulator` runs one or more fake devices against the broker. Each device connects with its own credentials, publishes temperature and humidity readings as JSON on `devices/<id>/telemetry`, subscribes to `devices/<id>/commands`, and publishes its state on `devices/<id>/state` when it connects and after every valid command.
+
+```bash
+export MQTT_PASSWORD_DEVICE_01=... MQTT_PASSWORD_DEVICE_02=...
+SIM_DEVICES=device-01,device-02 SIM_INTERVAL_SECONDS=5 python -m simulator
+```
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `SIM_DEVICES` | `device-01` | comma-separated device ids |
+| `MQTT_PASSWORD_<ID>` | required | password of each device (`device-01` becomes `MQTT_PASSWORD_DEVICE_01`) |
+| `MQTT_HOST`, `MQTT_PORT` | `127.0.0.1`, `11883` | broker address |
+| `SIM_INTERVAL_SECONDS` | `5` | seconds between readings |
+| `SIM_SEED` | `0` | seed of the random walk, so runs are reproducible |
+
+A telemetry message looks like `{"device_id": "device-01", "ts": "2030-01-01T12:00:00+00:00", "temperature_c": 22.13, "humidity_pct": 49.8}`. The relay command is `{"relay": "on"}` or `{"relay": "off"}`; anything else is ignored. With the relay on, the simulated temperature drifts down. The simulator's logic is covered by unit tests that need no broker; the broker tests still need `docker compose up`.
+
 ## Roadmap
 
 - [x] 1. Compose skeleton with an authenticated Mosquitto broker
-- [ ] 2. Device simulator
+- [x] 2. Device simulator
 - [ ] 3. TimescaleDB storage and Node-RED ingestion flow
 - [ ] 4. Grafana dashboards provisioned as code
 - [ ] 5. Alert rules and commands back to devices

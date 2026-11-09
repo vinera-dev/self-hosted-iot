@@ -206,5 +206,56 @@
     "x": 900,
     "y": 260,
     "wires": []
+  },
+  {
+    "id": "in-alert",
+    "type": "http in",
+    "z": "tab-ingest",
+    "name": "grafana alerts",
+    "url": "/alerts/grafana",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 120,
+    "y": 420,
+    "wires": [
+      [
+        "fn-alert"
+      ]
+    ]
+  },
+  {
+    "id": "fn-alert",
+    "type": "function",
+    "z": "tab-ingest",
+    "name": "alerts to rows",
+    "func": "return global.get('alerts').webhook(msg);",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 340,
+    "y": 420,
+    "wires": [
+      [
+        "pg-write"
+      ],
+      [
+        "out-alert-response"
+      ]
+    ]
+  },
+  {
+    "id": "out-alert-response",
+    "type": "http response",
+    "z": "tab-ingest",
+    "name": "reply",
+    "statusCode": "",
+    "headers": {},
+    "x": 600,
+    "y": 460,
+    "wires": []
   }
 ]

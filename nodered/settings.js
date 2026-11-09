@@ -3,6 +3,7 @@
 const { writeCredentialsFile } = require('/iot/lib/credentials');
 const ingest = require('/iot/lib/ingest');
 const rules = require('/iot/lib/rules');
+const alerts = require('/iot/lib/alerts');
 
 writeCredentialsFile('/data/flows_cred.json', process.env);
 
@@ -11,7 +12,7 @@ module.exports = {
   uiPort: 1880,
   credentialSecret: false,
   functionExternalModules: false,
-  functionGlobalContext: { ingest, rules },
+  functionGlobalContext: { ingest, rules, alerts },
   logging: { console: { level: 'info', metrics: false, audit: false } },
   editorTheme: { projects: { enabled: false } },
 };

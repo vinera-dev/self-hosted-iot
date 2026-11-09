@@ -1,0 +1,66 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: nodered-webhook
+    receivers:
+      - uid: nodered-webhook
+        type: webhook
+        settings:
+          url: http://nodered:1880/alerts/grafana
+          httpMethod: POST
+
+policies:
+  - orgId: 1
+    receiver: nodered-webhook
+    group_by: ["alertname", "device_id"]
+    group_wait: 0s
+    group_interval: 10s
+    repeat_interval: 1h
+
+groups:
+  - orgId: 1
+    name: iot-temperature
+    folder: IoT
+    interval: 10s
+    rules:
+      - uid: iot-high-temperature
+        title: High temperature
+        condition: B
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels:
+          severity: warning
+        annotations:
+          summary: Temperature above 32 C in the last minute
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: timescaledb
+            model:
+              refId: A
+              datasource:
+                type: grafana-postgresql-datasource
+                uid: timescaledb
+              format: table
+              rawQuery: true
+              editorMode: code
+              rawSql: >-
+                SELECT device_id, max(temperature_c) AS temperature_c FROM readings
+                WHERE ts > now() - INTERVAL '1 minute' GROUP BY device_id
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              datasource:
+                type: __expr__
+                uid: __expr__
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [32]

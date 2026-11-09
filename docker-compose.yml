@@ -57,6 +57,8 @@ services:
       PGDATABASE: ${POSTGRES_DB:-iot}
       PGPASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
       TZ: UTC
+      TEMP_HIGH_C: ${TEMP_HIGH_C:-28}
+      TEMP_LOW_C: ${TEMP_LOW_C:-25}
     volumes:
       - nodered-data:/data
       - ./nodered/flows.json:/data/flows.json:ro

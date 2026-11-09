@@ -65,7 +65,7 @@ services:
       - ./nodered/settings.js:/data/settings.js:ro
       - ./nodered/lib:/iot/lib:ro
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:1880/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:1880/nodered/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -81,13 +81,13 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?copy .env.example to .env}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: ${PUBLIC_BASE_URL:-http://127.0.0.1:21080}/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       POSTGRES_USER: ${POSTGRES_USER:-iot}
       POSTGRES_DB: ${POSTGRES_DB:-iot}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
-    ports:
-      - "127.0.0.1:${GRAFANA_PORT:-21300}:3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -102,6 +102,23 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-21080}:8080"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      grafana:
+        condition: service_healthy
+      nodered:
+        condition: service_healthy
 
 volumes:
   mosquitto-data:

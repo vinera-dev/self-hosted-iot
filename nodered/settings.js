@@ -10,6 +10,7 @@ writeCredentialsFile('/data/flows_cred.json', process.env);
 module.exports = {
   flowFile: 'flows.json',
   uiPort: 1880,
+  httpAdminRoot: '/nodered',
   credentialSecret: false,
   functionExternalModules: false,
   functionGlobalContext: { ingest, rules, alerts },

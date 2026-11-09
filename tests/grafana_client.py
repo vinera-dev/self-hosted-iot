@@ -12,7 +12,7 @@ REQUEST_TIMEOUT_SECONDS = 20
 
 
 def base_url() -> str:
-    return setting("GRAFANA_URL") or f"http://127.0.0.1:{setting('GRAFANA_PORT', '21300')}"
+    return setting("GRAFANA_URL") or f"http://127.0.0.1:{setting('HTTP_PORT', '21080')}/grafana"
 
 
 def credentials() -> str:

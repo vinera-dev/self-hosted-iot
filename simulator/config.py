@@ -35,7 +35,7 @@ def load_config(environ: Mapping[str, str] | None = None) -> SimulatorConfig:
     if len(set(ids)) != len(ids):
         raise ConfigError("SIM_DEVICES contains duplicated ids.")
     try:
-        port = int(env.get("MQTT_PORT", "11883"))
+        port = int(env.get("MQTT_PORT", "21883"))
         interval = float(env.get("SIM_INTERVAL_SECONDS", "5"))
         seed = int(env.get("SIM_SEED", "0"))
     except ValueError as error:

@@ -166,7 +166,7 @@ def test_config_defaults_to_one_device():
     assert [d.device_id for d in config.devices] == ["device-01"]
     assert (config.host, config.port, config.interval_seconds, config.seed) == (
         "127.0.0.1",
-        11883,
+        21883,
         5.0,
         0,
     )

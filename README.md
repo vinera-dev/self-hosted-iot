@@ -40,7 +40,7 @@ bash scripts/create-mqtt-users.sh device-01 device-02
 docker compose restart mosquitto
 ```
 
-The broker listens on `127.0.0.1:11883` (set `MQTT_PORT` to change it). The script creates the `service` user and one user per device with random passwords, writes the hashed password file used by Mosquitto, and saves the plain credentials to `.secrets/mqtt-credentials.env`. Both are ignored by git.
+The broker listens on `127.0.0.1:21883` (set `MQTT_PORT` to change it). The script creates the `service` user and one user per device with random passwords, writes the hashed password file used by Mosquitto, and saves the plain credentials to `.secrets/mqtt-credentials.env`. Both are ignored by git.
 
 ### Access model
 
@@ -76,7 +76,7 @@ SIM_DEVICES=device-01,device-02 SIM_INTERVAL_SECONDS=5 python -m simulator
 |---|---|---|
 | `SIM_DEVICES` | `device-01` | comma-separated device ids |
 | `MQTT_PASSWORD_<ID>` | required | password of each device (`device-01` becomes `MQTT_PASSWORD_DEVICE_01`) |
-| `MQTT_HOST`, `MQTT_PORT` | `127.0.0.1`, `11883` | broker address |
+| `MQTT_HOST`, `MQTT_PORT` | `127.0.0.1`, `21883` | broker address |
 | `SIM_INTERVAL_SECONDS` | `5` | seconds between readings |
 | `SIM_SEED` | `0` | seed of the random walk, so runs are reproducible |
 

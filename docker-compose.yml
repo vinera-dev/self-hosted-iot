@@ -1,10 +1,10 @@
-name: self-hosted-iot
+name: iot
 
 services:
   mosquitto:
     image: eclipse-mosquitto:2
     ports:
-      - "127.0.0.1:${MQTT_PORT:-11883}:1883"
+      - "127.0.0.1:${MQTT_PORT:-21883}:1883"
     volumes:
       - ./mosquitto/config:/mosquitto/config
       - mosquitto-data:/mosquitto/data

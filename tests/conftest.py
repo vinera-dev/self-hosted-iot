@@ -29,7 +29,7 @@ def load_credentials() -> dict[str, str]:
 @pytest.fixture(scope="session")
 def broker() -> tuple[str, int]:
     host = os.environ.get("MQTT_HOST", "127.0.0.1")
-    port = int(os.environ.get("MQTT_PORT", "11883"))
+    port = int(os.environ.get("MQTT_PORT", "21883"))
     try:
         socket.create_connection((host, port), timeout=2).close()
     except OSError:

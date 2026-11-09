@@ -37,13 +37,22 @@ add_user() {
 docker compose run --rm --no-deps -T --entrypoint sh mosquitto \
   -c "rm -f $PASSWD_FILE" > /dev/null
 
-add_user service "$(generate_password)" "-c"
+SERVICE_PASSWORD="$(generate_password)"
+add_user service "$SERVICE_PASSWORD" "-c"
 for device in "$@"; do
   add_user "$device" "$(generate_password)" ""
 done
 
 docker compose run --rm --no-deps -T --entrypoint sh mosquitto \
   -c "chown mosquitto:mosquitto $PASSWD_FILE $ACL_FILE && chmod 600 $PASSWD_FILE && chmod 640 $ACL_FILE" > /dev/null
+
+NODERED_ENV_FILE="$SECRETS_DIR/nodered.env"
+: > "$NODERED_ENV_FILE"
+chmod 600 "$NODERED_ENV_FILE"
+{
+  printf 'MQTT_USERNAME=service\n'
+  printf 'MQTT_PASSWORD=%s\n' "$SERVICE_PASSWORD"
+} >> "$NODERED_ENV_FILE"
 
 echo "created users: service $*"
 echo "credentials written to $CREDENTIALS_FILE"

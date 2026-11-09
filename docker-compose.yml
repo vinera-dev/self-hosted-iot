@@ -45,6 +45,35 @@ services:
         condition: service_healthy
     restart: "no"
 
+  nodered:
+    build: ./nodered
+    image: iot-nodered:local
+    env_file:
+      - path: .secrets/nodered.env
+        required: false
+    environment:
+      PGHOST: timescaledb
+      PGUSER: ${POSTGRES_USER:-iot}
+      PGDATABASE: ${POSTGRES_DB:-iot}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
+      TZ: UTC
+    volumes:
+      - nodered-data:/data
+      - ./nodered/flows.json:/data/flows.json:ro
+      - ./nodered/settings.js:/data/settings.js:ro
+      - ./nodered/lib:/iot/lib:ro
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:1880/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
 volumes:
   mosquitto-data:
+  nodered-data:
   timescaledb-data:

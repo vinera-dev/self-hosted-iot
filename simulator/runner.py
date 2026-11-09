@@ -47,7 +47,12 @@ def start_sessions(config: SimulatorConfig) -> list[DeviceSession]:
     sessions = []
     for credentials in config.devices:
         client = build_client(credentials, config)
-        session = DeviceSession(Device(credentials.device_id, seed=config.seed), client)
+        device = Device(
+            credentials.device_id,
+            seed=config.seed,
+            base_temperature_c=config.base_temperature_c,
+        )
+        session = DeviceSession(device, client)
         client.on_connect = lambda _c, _u, _f, _r, _p, session=session: session.on_connect()
         client.on_message = lambda _c, _u, message, session=session: session.on_message(
             message.topic, message.payload

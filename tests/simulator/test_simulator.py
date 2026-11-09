@@ -172,6 +172,13 @@ def test_config_defaults_to_one_device():
     )
 
 
+def test_config_reads_the_base_temperature():
+    config = load_config({"MQTT_PASSWORD_DEVICE_01": "secret", "SIM_BASE_TEMPERATURE_C": "31.5"})
+
+    assert config.base_temperature_c == 31.5
+    assert load_config({"MQTT_PASSWORD_DEVICE_01": "secret"}).base_temperature_c == 22.0
+
+
 def test_config_supports_several_devices_with_their_own_passwords():
     config = load_config(ENV)
 
@@ -194,6 +201,11 @@ def test_password_variable_name():
         {"SIM_DEVICES": "device-01", "MQTT_PASSWORD_DEVICE_01": "a", "MQTT_PORT": "abc"},
         {"SIM_DEVICES": "device-01", "MQTT_PASSWORD_DEVICE_01": "a", "MQTT_PORT": "70000"},
         {"SIM_DEVICES": "device-01", "MQTT_PASSWORD_DEVICE_01": "a", "SIM_INTERVAL_SECONDS": "0"},
+        {
+            "SIM_DEVICES": "device-01",
+            "MQTT_PASSWORD_DEVICE_01": "a",
+            "SIM_BASE_TEMPERATURE_C": "hot",
+        },
     ],
 )
 def test_invalid_configuration_is_rejected(env):

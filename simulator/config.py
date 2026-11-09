@@ -15,6 +15,7 @@ class SimulatorConfig:
     port: int
     interval_seconds: float
     seed: int
+    base_temperature_c: float
     devices: tuple[DeviceCredentials, ...]
 
 
@@ -38,6 +39,7 @@ def load_config(environ: Mapping[str, str] | None = None) -> SimulatorConfig:
         port = int(env.get("MQTT_PORT", "21883"))
         interval = float(env.get("SIM_INTERVAL_SECONDS", "5"))
         seed = int(env.get("SIM_SEED", "0"))
+        base_temperature = float(env.get("SIM_BASE_TEMPERATURE_C", "22"))
     except ValueError as error:
         raise ConfigError(f"Invalid numeric setting: {error}") from error
     if not 0 < port < 65536:
@@ -55,5 +57,6 @@ def load_config(environ: Mapping[str, str] | None = None) -> SimulatorConfig:
         port=port,
         interval_seconds=interval,
         seed=seed,
+        base_temperature_c=base_temperature,
         devices=tuple(devices),
     )

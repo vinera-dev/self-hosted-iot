@@ -232,7 +232,7 @@
           "format": "time_series",
           "rawQuery": true,
           "editorMode": "code",
-          "rawSql": "SELECT bucket AS time, device_id AS metric, avg_temperature_c AS value FROM readings_1h WHERE $__timeFilter(bucket) AND device_id IN ($device) ORDER BY 1"
+          "rawSql": "SELECT bucket AS time, device_id AS metric, avg_temperature_c AS value FROM readings_1h WHERE bucket >= time_bucket(INTERVAL '1 hour', $__timeFrom()::timestamptz) AND bucket <= $__timeTo() AND device_id IN ($device) ORDER BY 1"
         }
       ]
     }

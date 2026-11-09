@@ -14,5 +14,37 @@ services:
       timeout: 3s
       retries: 10
 
+  timescaledb:
+    image: timescale/timescaledb:2.17.2-pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-iot}
+      POSTGRES_DB: ${POSTGRES_DB:-iot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-21432}:5432"
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    image: timescale/timescaledb:2.17.2-pg16
+    entrypoint: ["sh", "/db/migrate.sh"]
+    environment:
+      PGHOST: timescaledb
+      PGUSER: ${POSTGRES_USER:-iot}
+      PGDATABASE: ${POSTGRES_DB:-iot}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
+    volumes:
+      - ./db:/db:ro
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    restart: "no"
+
 volumes:
   mosquitto-data:
+  timescaledb-data:

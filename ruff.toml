@@ -6,5 +6,5 @@ extend-exclude = [".venv"]
 select = ["E", "F", "I", "B", "UP", "S", "C4", "SIM", "T20"]
 
 [lint.per-file-ignores]
-"tests/**" = ["S101"]
+"tests/**" = ["S101", "S603", "S607", "S608"]
 "simulator/device.py" = ["S311"]

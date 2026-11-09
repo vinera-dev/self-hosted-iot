@@ -17,3 +17,4 @@ mosquitto/config/passwd
 certs/
 *.pem
 *.key
+backups/

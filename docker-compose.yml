@@ -5,8 +5,10 @@ services:
     image: eclipse-mosquitto:2
     ports:
       - "127.0.0.1:${MQTT_PORT:-21883}:1883"
+      - "127.0.0.1:${MQTT_TLS_PORT:-21884}:8883"
     volumes:
       - ./mosquitto/config:/mosquitto/config
+      - ./certs:/mosquitto/certs:ro
       - mosquitto-data:/mosquitto/data
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 1883"]
@@ -81,7 +83,7 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?copy .env.example to .env}
       GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_SERVER_ROOT_URL: ${PUBLIC_BASE_URL:-http://127.0.0.1:21080}/grafana/
+      GF_SERVER_ROOT_URL: ${PUBLIC_BASE_URL:-https://127.0.0.1:21443}/grafana/
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
@@ -107,8 +109,12 @@ services:
     image: nginx:1.27-alpine
     ports:
       - "127.0.0.1:${HTTP_PORT:-21080}:8080"
+      - "127.0.0.1:${HTTPS_PORT:-21443}:8443"
+    environment:
+      NGINX_HTTPS_PORT: ${HTTPS_PORT:-21443}
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
+      - ./certs:/etc/nginx/certs:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz || exit 1"]
       interval: 5s

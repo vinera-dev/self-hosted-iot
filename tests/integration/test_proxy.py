@@ -13,6 +13,13 @@ def proxy_running() -> None:
         pytest.skip("nginx is not running; run `docker compose up -d --wait`")
 
 
+def test_plain_http_is_redirected_to_https() -> None:
+    status, headers, _ = fetch("/grafana/login?x=1", secure=False)
+    assert status == 308
+    assert headers["location"].startswith("https://127.0.0.1:")
+    assert headers["location"].endswith("/grafana/login?x=1")
+
+
 def test_root_redirects_to_grafana() -> None:
     status, headers, _ = fetch("/")
     assert status == 302

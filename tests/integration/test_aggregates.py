@@ -4,14 +4,15 @@ from stack import psql
 pytestmark = pytest.mark.usefixtures("database")
 
 DEVICE = "aggregate-test"
-REFRESH = "CALL refresh_continuous_aggregate('{view}', '2030-03-01', '2030-03-02')"
+DAY = "date_trunc('day', now() - INTERVAL '3 days')"
+REFRESH = f"CALL refresh_continuous_aggregate('{{view}}', {DAY}, {DAY} + INTERVAL '1 day')"
 
 
 @pytest.fixture
 def samples():
     psql(
         "INSERT INTO readings (ts, device_id, temperature_c, humidity_pct) "
-        "SELECT '2030-03-01T00:00:00Z'::timestamptz + n * INTERVAL '1 minute', "
+        f"SELECT {DAY} + n * INTERVAL '1 minute', "
         f"'{DEVICE}', 20 + n * 0.5, 50 FROM generate_series(0, 119) AS n"
     )
     yield
@@ -36,7 +37,7 @@ def test_five_minute_aggregate_matches_the_raw_data(samples) -> None:
     psql(REFRESH.format(view="readings_5m"))
     row = psql(
         "SELECT samples, avg_temperature_c, min_temperature_c, max_temperature_c "
-        f"FROM readings_5m WHERE device_id = '{DEVICE}' AND bucket = '2030-03-01T00:00:00Z'"
+        f"FROM readings_5m WHERE device_id = '{DEVICE}' AND bucket = {DAY}"
     )
     assert row == "5|21|20|22"
     assert psql(f"SELECT count(*) FROM readings_5m WHERE device_id = '{DEVICE}'") == "24"
@@ -46,7 +47,7 @@ def test_hourly_aggregate_matches_the_raw_data(samples) -> None:
     psql(REFRESH.format(view="readings_1h"))
     row = psql(
         "SELECT samples, avg_temperature_c FROM readings_1h "
-        f"WHERE device_id = '{DEVICE}' AND bucket = '2030-03-01T01:00:00Z'"
+        f"WHERE device_id = '{DEVICE}' AND bucket = {DAY} + INTERVAL '1 hour'"
     )
     assert row == "60|64.75"
 
@@ -55,6 +56,6 @@ def test_queries_read_from_the_materialized_hypertable(samples) -> None:
     psql(REFRESH.format(view="readings_5m"))
     plan = psql(
         "EXPLAIN SELECT bucket, avg_temperature_c FROM readings_5m "
-        f"WHERE device_id = '{DEVICE}' AND bucket >= '2030-03-01' AND bucket < '2030-03-02'"
+        f"WHERE device_id = '{DEVICE}' AND bucket >= {DAY} AND bucket < {DAY} + INTERVAL '1 day'"
     )
     assert "_materialized_hypertable_" in plan

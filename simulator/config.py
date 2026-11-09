@@ -16,6 +16,7 @@ class SimulatorConfig:
     interval_seconds: float
     seed: int
     base_temperature_c: float
+    tls_ca: str | None
     devices: tuple[DeviceCredentials, ...]
 
 
@@ -58,5 +59,6 @@ def load_config(environ: Mapping[str, str] | None = None) -> SimulatorConfig:
         interval_seconds=interval,
         seed=seed,
         base_temperature_c=base_temperature,
+        tls_ca=env.get("MQTT_TLS_CA") or None,
         devices=tuple(devices),
     )

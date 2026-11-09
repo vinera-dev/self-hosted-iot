@@ -1,4 +1,5 @@
 import queue
+import ssl
 import threading
 import uuid
 from dataclasses import dataclass, field
@@ -53,7 +54,14 @@ class Session:
         self.client.disconnect()
 
 
-def open_session(host: str, port: int, username: str | None, password: str | None) -> Session:
+def open_session(
+    host: str,
+    port: int,
+    username: str | None,
+    password: str | None,
+    ca_certs: str | None = None,
+    verify: bool = True,
+) -> Session:
     client = mqtt.Client(
         CallbackAPIVersion.VERSION2,
         client_id=f"test-{uuid.uuid4().hex[:12]}",
@@ -61,6 +69,9 @@ def open_session(host: str, port: int, username: str | None, password: str | Non
     )
     if username is not None:
         client.username_pw_set(username, password)
+    if ca_certs is not None or not verify:
+        client.tls_set(ca_certs=ca_certs, cert_reqs=ssl.CERT_REQUIRED if verify else ssl.CERT_NONE)
+        client.tls_insecure_set(not verify)
     session = Session(client=client)
 
     def on_connect(_client, _userdata, _flags, reason_code, _properties):

@@ -1,18 +1,23 @@
 import base64
 import json
 import re
+import ssl
 import time
 import urllib.error
 import urllib.request
 from typing import Any
 
-from stack import setting
+from stack import ROOT, setting
 
 REQUEST_TIMEOUT_SECONDS = 20
 
 
+def tls_context() -> ssl.SSLContext:
+    return ssl.create_default_context(cafile=str(ROOT / "certs" / "ca.crt"))
+
+
 def base_url() -> str:
-    return setting("GRAFANA_URL") or f"http://127.0.0.1:{setting('HTTP_PORT', '21080')}/grafana"
+    return setting("GRAFANA_URL") or f"https://127.0.0.1:{setting('HTTPS_PORT', '21443')}/grafana"
 
 
 def credentials() -> str:
@@ -28,7 +33,9 @@ def request(path: str, body: dict | None = None, authenticated: bool = True) -> 
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(base_url() + path, data=data, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+        with urllib.request.urlopen(
+            req, timeout=REQUEST_TIMEOUT_SECONDS, context=tls_context()
+        ) as response:
             return response.status, json.load(response)
     except urllib.error.HTTPError as error:
         payload = error.read()

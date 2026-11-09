@@ -13,6 +13,24 @@ server {
         return 200 "ok\n";
     }
 
+    location / {
+        return 308 https://$host:${NGINX_HTTPS_PORT}$request_uri;
+    }
+}
+
+server {
+    listen 8443 ssl;
+    server_name _;
+
+    ssl_certificate /etc/nginx/certs/server.crt;
+    ssl_certificate_key /etc/nginx/certs/server.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:tls:5m;
+    ssl_session_timeout 1h;
+
+    add_header X-Content-Type-Options nosniff always;
+
     location = / {
         return 302 /grafana/;
     }

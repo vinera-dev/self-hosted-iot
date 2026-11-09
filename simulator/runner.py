@@ -39,6 +39,8 @@ class DeviceSession:
 def build_client(credentials: DeviceCredentials, config: SimulatorConfig) -> mqtt.Client:
     client = mqtt.Client(CallbackAPIVersion.VERSION2, client_id=credentials.device_id)
     client.username_pw_set(credentials.device_id, credentials.password)
+    if config.tls_ca:
+        client.tls_set(ca_certs=config.tls_ca)
     client.connect(config.host, config.port)
     return client
 

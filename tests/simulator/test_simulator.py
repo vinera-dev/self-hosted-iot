@@ -179,6 +179,13 @@ def test_config_reads_the_base_temperature():
     assert load_config({"MQTT_PASSWORD_DEVICE_01": "secret"}).base_temperature_c == 22.0
 
 
+def test_config_enables_tls_only_when_a_ca_is_given():
+    base = {"MQTT_PASSWORD_DEVICE_01": "secret"}
+
+    assert load_config(base).tls_ca is None
+    assert load_config({**base, "MQTT_TLS_CA": "certs/ca.crt"}).tls_ca == "certs/ca.crt"
+
+
 def test_config_supports_several_devices_with_their_own_passwords():
     config = load_config(ENV)
 
